@@ -1,4 +1,4 @@
-import User from "../models/User";
+import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
 export async function signup(req, res) {
@@ -28,9 +28,9 @@ export async function signup(req, res) {
     }
 
     const idx = Math.floor(Math.random() * 100) + 1; //generate num between 1-100 inclusive
-    const randomAvatar = `https://avatar.iran.liara.run/public/{idx}.png`;
+    const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
 
-    const newUser = new User.create({
+    const newUser = await User.create({
       email,
       fullName,
       password,
@@ -44,7 +44,19 @@ export async function signup(req, res) {
         expiresIn: "7d",
       }
     );
-  } catch (error) {}
+
+    res.cookie("jtw", token, {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_EV === "production",
+    });
+
+    res.status(201).json({ success: true, user: newUser });
+  } catch (error) {
+    console.log("Error in signup controller", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
 }
 
 export async function login(req, res) {

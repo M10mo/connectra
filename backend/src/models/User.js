@@ -53,8 +53,6 @@ const userSchema = new mongoose.Schema(
 );
 //createdAt, updatedAt
 
-const User = mongoose.model("User", userSchema);
-
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -67,5 +65,7 @@ userSchema.pre("save", async function (next) {
     next(error);
   }
 });
+
+const User = mongoose.model("User", userSchema);
 
 export default User;
