@@ -16,13 +16,13 @@ const App = () => {
   //axios
   const {data, isLoading, isError} = useQuery({
     queryKey:["todos"],
-
     queryFn: async() => {
       const res = await axiosInstance.get("/auth/me")
       return res.data
-    }
-  })
-  console.log(data)
+    },
+    retry: false,
+  });
+  
   console.log({data})
   console.log({isLoading})
   console.log({isError})
