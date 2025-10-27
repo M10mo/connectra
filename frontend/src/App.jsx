@@ -8,19 +8,27 @@ import CallPage from './pages/CallPage';
 import ChatPage from './pages/ChatPage';
 import toast, { Toaster } from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
+import { axiosInstance } from './lib/axios.js';
+import axios from 'axios';
 
 const App = () => {
 
   //axios
-  const {data, isLoading, isError} = useQuery({queryKey:"todos",
+  const {data, isLoading, isError} = useQuery({
+    queryKey:["todos"],
+
     queryFn: async() => {
-      const res = await fetch("https://jsonplaceholder.typicode.com/todos")
-      const data = await res.json()
-      return data
+      const res = await axiosInstance.get("localhost:5001/api/auth/me")
+      return res.data
     }
   })
+  console.log(data)
+  console.log({data})
+  console.log({isLoading})
+  console.log({isError})
+  
   return <div className=" h-screen" data-theme='night'>
-    <button onClick={() => toast.error('Hello World')}>Create a toast!</button>
+    <button onClick={() => toast.success('Hello World')}>Create a toast!</button>
     <Routes>
       <Route path="/" element={<HomePage />}></Route>
       <Route path="/signup" element={<SignUpPage />}></Route>
