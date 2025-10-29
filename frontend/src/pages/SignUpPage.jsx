@@ -1,6 +1,9 @@
 import React, { useState } from 'react'
 import { ShipWheelIcon } from "lucide-react"
 import { Link } from 'react-router';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { axiosInstance } from '../lib/axios';
+import { signup } from '../lib/api';
 
 const SignUpPage = () => {
   const [signupData, setSignupData] = useState({
@@ -8,9 +11,16 @@ const SignUpPage = () => {
     email: "",
     password: "",
   });
+  const queryClient = useQueryClient()
+
+  const { mutate: signupMutation, isPending, error } = useMutation({
+    mutationFn: signup,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["authUser"] })
+  })
 
   const handleSignup = (e) => {
     e.preventDefault()
+    signupMutation(signupData)
   }
   return (
     <div className="h-screen flex items-center justify-center p-4 sm:p-6 md:p-8" data-theme="forest">
@@ -27,6 +37,12 @@ const SignUpPage = () => {
             </span>
           </div>
 
+          {/* error message if any */}
+          {error && (
+            <div className='alert alert-error mb-4'>
+              <span>{error.response.data.message}</span>
+            </div>
+          )}
           <div className='w-full '>
             <form onSubmit={handleSignup}>
               <div className='space-y-4'>
@@ -88,7 +104,14 @@ const SignUpPage = () => {
                 </div>
 
                 <button className='btn btn-primary w-full' type='submit' >
-                  Create Account
+                  {isPending ? (
+                    <>
+                      <span className='loading loading-spinner loading-xs'></span>
+                      Loading...
+                    </>
+                  ) : (
+                    "Create Account"
+                  )}
                 </button>
 
                 <div className='text-center mt-4'>
@@ -103,8 +126,23 @@ const SignUpPage = () => {
             </form>
           </div>
         </div>
-      </div>
 
+        {/* signup form right side */}
+        <div className='hidden lg:flex w-full lg:w-1/2 bg-primary/10 items-center justify-center'>
+          <div className='max-w-md p-8'>
+            {/*image*/}
+            <div className='relative aspect-square max-w-sm mx-auto'>
+              <img src='/i.png' alt='Themed video call image' className='w-full h-full' />
+            </div>
+            <div className='text-center space-y-3 mt-6'>
+              <h2 className='text-xl font-semibold'>Connect with language learners worldwide.</h2>
+              <p className='opacity-70'>
+                Practice conversations, make friends, and improve your language skills together!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
