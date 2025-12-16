@@ -3,17 +3,19 @@ import useAuthUser from "../hooks/useAuthUser";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { completeOnboarding } from "../lib/api.js";
-import { CameraIcon, ShuffleIcon } from "lucide-react";
+import {
+  CameraIcon,
+  Languages,
+  LoaderIcon,
+  MapPinIcon,
+  ShipWheelIcon,
+  ShuffleIcon,
+} from "lucide-react";
+import { LANGUAGES } from "../constants/index.js";
 
 const OnboardingPage = () => {
   const { authUser } = useAuthUser();
   const queryClient = useQueryClient();
-
-  // Generate a random avatar if none exists
-  const generateRandomAvatar = () => {
-    const idx = Math.floor(Math.random() * 100) + 1;
-    return `https://avatar.iran.liara.run/public/${idx}.png`;
-  };
 
   const [formState, setFormState] = useState({
     fullName: "",
@@ -25,22 +27,22 @@ const OnboardingPage = () => {
   });
 
   // Update form state when authUser loads
-  useEffect(() => {
-    if (authUser) {
-      setFormState((prevState) => ({
-        fullName: authUser?.fullName || "",
-        bio: authUser?.bio || "",
-        nativeLanguage: authUser?.nativeLanguage || "",
-        learningLanguage: authUser?.learningLanguage || "",
-        location: authUser?.location || "",
-        // Only use existing profilePic if it exists, otherwise generate one if don't have one yet
-        profilePic:
-          authUser?.profilePic ||
-          prevState.profilePic ||
-          generateRandomAvatar(),
-      }));
-    }
-  }, [authUser]);
+  // useEffect(() => {
+  //   if (authUser) {
+  //     setFormState((prevState) => ({
+  //       fullName: authUser?.fullName || "",
+  //       bio: authUser?.bio || "",
+  //       nativeLanguage: authUser?.nativeLanguage || "",
+  //       learningLanguage: authUser?.learningLanguage || "",
+  //       location: authUser?.location || "",
+  //       // Only use existing profilePic if it exists, otherwise generate one if don't have one yet
+  //       profilePic:
+  //         authUser?.profilePic ||
+  //         prevState.profilePic ||
+  //         generateRandomAvatar(),
+  //     }));
+  //   }
+  // }, [authUser]);
 
   const { mutate: onboardingMutation, isPending } = useMutation({
     mutationFn: completeOnboarding,
@@ -48,13 +50,22 @@ const OnboardingPage = () => {
       toast.success("Profile created successfully");
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
     },
+    onError: (error) => {
+      console.log(error);
+      toast.error(error.response.data.message);
+    }
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onboardingMutation(formState);
   };
-  const handleRandomAvatar = () => { };
+  const handleRandomAvatar = () => {
+    const idx = Math.floor(Math.random() * 100) + 1; // 1-100 inclusive
+    const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
+    setFormState({ ...formState, profilePic: randomAvatar });
+    toast.success("Random profile picture generated!");
+  };
 
   return (
     <div className="min-h-screen bg-base-100 flex items-center justify-center p-4">
@@ -125,7 +136,94 @@ const OnboardingPage = () => {
             </div>
 
             {/* languages */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* native language */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Native Language</span>
+                </label>
+                <select
+                  name="nativeLanguage"
+                  value={formState.nativeLanguage}
+                  onChange={(e) =>
+                    setFormState({
+                      ...formState,
+                      nativeLanguage: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">Select your native language</option>
+                  {LANGUAGES.map((lang) => (
+                    <option key={`native-${lang}`} value={lang.toLowerCase()}>
+                      {lang}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
+              {/* learning language */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Learning Language</span>
+                </label>
+                <select
+                  name="learningLanguage"
+                  value={formState.learningLanguage}
+                  onChange={(e) =>
+                    setFormState({
+                      ...formState,
+                      learningLanguage: e.target.value,
+                    })
+                  }
+                  className="select select-bordered w-full"
+                >
+                  <option value="">Select the language you're learning</option>
+                  {LANGUAGES.map((lang) => (
+                    <option key={`learning-${lang}`} value={lang.toLowerCase()}>
+                      {lang}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            {/* location */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Location</span>
+              </label>
+              <div className="relative">
+                <MapPinIcon className="absolute top-1/2 transform -translate-y-1/2 left-3 size-5 text-base-content opacity-70" />
+                <input
+                  type="text"
+                  name="location"
+                  value={formState.location}
+                  onChange={(e) =>
+                    setFormState({ ...formState, location: e.target.value })
+                  }
+                  className="input input-bordered w-full pl-10"
+                  placeholder="City, Country"
+                />
+              </div>
+            </div>
+
+            {/* submit btn */}
+            <button
+              className="btn btn-primary w-full"
+              disabled={isPending}
+              type="submit"
+            >
+              {!isPending ? (
+                <>
+                  <ShipWheelIcon className="size-5 mr-2" />
+                  Complete Onboarding!
+                </>
+              ) : (
+                <>
+                  <LoaderIcon className="animate-spin size-5 mr-2" />
+                  Onboarding...
+                </>
+              )}
+            </button>
           </form>
         </div>
       </div>
