@@ -125,7 +125,7 @@ export async function getFriendRequests(req, res) {
       status: "pending",
     }).populate(
       "sender",
-      "fullName, profilePic nativeLanguage learningLanguage",
+      "fullName profilePic nativeLanguage learningLanguage",
     );
 
     const acceptedRequests = await FriendRequest.find({
