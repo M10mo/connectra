@@ -18,12 +18,12 @@ const OnboardingPage = () => {
   const queryClient = useQueryClient();
 
   const [formState, setFormState] = useState({
-    fullName: "",
-    bio: "",
-    nativeLanguage: "",
-    learningLanguage: "",
-    location: "",
-    profilePic: "",
+    fullName: authUser?.fullName || "",
+    bio: authUser?.bio || "",
+    nativeLanguage: authUser?.nativeLanguage || "",
+    learningLanguage: authUser?.learningLanguage || "",
+    location: authUser?.location || "",
+    profilePic: authUser?.profilePic || "",
   });
 
   // Update form state when authUser loads
