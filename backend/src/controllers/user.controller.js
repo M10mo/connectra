@@ -10,7 +10,7 @@ export async function getRecommendedUsers(req, res) {
     const recommendedUsers = await User.find({
       $and: [
         { _id: { $ne: currentUserId } },
-        { $id: { $nin: currentUser.friends } },
+        { _id: { $nin: currentUser.friends } },
         { isOnboarded: true },
       ],
     });
@@ -27,7 +27,7 @@ export async function getMyFriends(req, res) {
       .select("friends")
       .populate(
         "friends",
-        "fullName profilePic nativeLanguage learningLanguage"
+        "fullName profilePic nativeLanguage learningLanguage",
       );
 
     res.status(200).json(user.friends);
@@ -125,7 +125,7 @@ export async function getFriendRequests(req, res) {
       status: "pending",
     }).populate(
       "sender",
-      "fullName, profilePic nativeLanguage learningLanguage"
+      "fullName, profilePic nativeLanguage learningLanguage",
     );
 
     const acceptedRequests = await FriendRequest.find({
@@ -147,7 +147,7 @@ export async function getOutgoingFriendRequests(req, res) {
       status: "pending",
     }).populate(
       "recipient",
-      "fullName profilePic nativeLanguage learningLanguage"
+      "fullName profilePic nativeLanguage learningLanguage",
     );
     res.status(200).json(outgoingRequests);
   } catch (error) {
